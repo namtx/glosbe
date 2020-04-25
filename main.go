@@ -1,9 +1,12 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/namtx/glosbe/color"
@@ -15,7 +18,20 @@ const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/
 func main() {
 	client := &http.Client{}
 
-	req, err := http.NewRequest("GET", "https://glosbe.com/vi/en/"+os.Args[1], nil)
+	var reverse = flag.Bool("-r", true, "reverse the translation source and destination")
+
+	var source string
+	var destination string
+
+	if *reverse {
+		source = "en"
+		destination = "vi"
+	} else {
+		source = "vi"
+		destination = "en"
+	}
+
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://glosbe.com/%s/%s/%s", source, destination, os.Args[1]), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,7 +55,7 @@ func main() {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"VI", "EN"})
+	table.SetHeader([]string{strings.ToUpper(source), strings.ToUpper(destination)})
 	table.SetRowLine(true)
 	table.SetColWidth(55)
 
